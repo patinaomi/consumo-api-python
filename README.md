@@ -3,3 +3,5 @@
 pip install  json
 import oracledb
 import requests
+
+https://randomuser.me/documentation
