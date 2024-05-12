@@ -77,36 +77,74 @@ sql_criar_tabela = """
     tel_celular NUMBER(20)
 )"""
 
-# operacao_db(sql_drop_tabela, secret)
-# operacao_db(sql_criar_tabela, secret)
+
+def obter_dados_api(qtd_busca, genero):
+    gender_param = '' if genero == 'both' else f'&gender={genero}'
+    url = f'https://randomuser.me/api/?results={qtd_busca}&nat=br{gender_param}&inc=name,gender,nat,location,dob,email,phone,cell,picture&noinfo'
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        dados = response.json()['results']
+        return [{
+            'nome_completo': f"{dado['name']['first']} {dado['name']['last']}",
+            'genero': 'Feminino' if dado['gender'] == 'female' else 'Masculino',
+            'data': dado['dob']['date'][:10],
+            'endereco': f"{dado['location']['street']['name']} {dado['location']['street']['number']}",
+            'email': dado['email'],
+            'tel_residencial': validar_telefone(dado['phone'], False),
+            'tel_celular': validar_telefone(dado['cell']),
+            'imagem': dado['picture']['large']
+        } for dado in dados]
+    return None
 
 
-qtd_busca = 1
-genero = 'female'
+def inserir_dados_usuario(dados_usuario, secret):
+    if dados_usuario:
+        sql_insert = f"""
+        INSERT INTO t_user (
+            nome, genero, data, endereco, email, tel_residencial, tel_celular
+        ) VALUES (
+            '{dados_usuario['nome']}', '{dados_usuario['genero']}', TO_DATE('{dados_usuario['data']}', 'YYYY-MM-DD'), 
+            '{dados_usuario['endereco']}', '{dados_usuario['email']}', {dados_usuario['tel_residencial']}, {dados_usuario['tel_celular']}
+        )"""
+        operacao_db(sql_insert, secret)
+        return True
+    return False
 
-url = (f'https://randomuser.me/api/?results={qtd_busca}&nat=br,&gender={genero},&inc=name,gender,nat,location,dob,'
-       f'email,phone,cell&noinfo')
 
-response = requests.get(url)
+# Parte do Flask
+app = Flask(__name__, template_folder='.')
 
-# Dados obtidos na consulta inicial
+@app.route('/')
+def home():
+    return render_template('/templates/index.html')
 
-dict_pessoa = response.json()  # Converte a resposta em JSON para um dicionário Python
+@app.route('/api/externo')
+def obter_dados():
+    qtd_busca = request.args.get('busca', default=1, type=int)
+    genero = request.args.get('genero', default='both', type=str)
+    dados = obter_dados_api(qtd_busca, genero)
+    if dados:
+        return jsonify(dados), 200
+    else:
+        return jsonify({'erro': 'Falha ao obter dados da API'}), 400
 
 
-# Deserializar o JSON para um objeto Python
+@app.route('/api/salvar', methods=['POST'])
+def salvar_dados():
+    dados = request.get_json()  # Obter os dados JSON enviados pelo cliente
+    if not dados:
+        return jsonify({'erro': 'Nenhum dado para salvar'}), 400
 
-# Preparando os dados para o banco
-nome_completo = dict_pessoa['results'][0]['name']['first'] + ' ' + dict_pessoa['results'][0]['name']['last']
-genero = 'F' if dict_pessoa['results'][0]['gender'] == 'female' else 'M'
-data = dict_pessoa['results'][0]['dob']['date'][:10]  # Pra pegar só a data certinho
-endereco = dict_pessoa['results'][0]['location']['street']['name'] + ' ' + str(dict_pessoa['results'][0]['location']['street']['number'])
-email = dict_pessoa['results'][0]['email']
-tel_residencial = validar_telefone(dict_pessoa['results'][0]['phone'], False)
-tel_celular = validar_telefone(dict_pessoa['results'][0]['cell'])
+    resultados = []
+    for dado in dados:
+        if inserir_dados_usuario(dado, secret):
+            resultados.append({'nome': dado['nome_completo'], 'status': 'sucesso'})
+        else:
+            resultados.append({'nome': dado['nome_completo'], 'status': 'falha'})
 
-sql_insert = f"""INSERT INTO t_user (nome, genero, data, endereco, email, tel_residencial, tel_celular) VALUES ('{
-nome_completo}', '{genero}',  TO_DATE('{data}','YYYY-MM-DD'), '{endereco}', '{email}', {tel_residencial},
-{tel_celular})"""
+    return jsonify(resultados), 200
 
-operacao_db(sql_insert, secret)
+ 
+if __name__ == '__main__':
+    app.run(debug=True)

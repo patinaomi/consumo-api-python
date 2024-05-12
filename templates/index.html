@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>CP5 - Consumo de API com Python</title>
+</head>
+<body class="main-container">
+    <h1 class="title">Obter Dados</h1>
+    <form id="dadosForm" class="data-form">
+        <div class="form-group">
+            <label for="generoSelect">Gênero:</label>
+            <select name="genero" id="generoSelect" class="input-field">
+                <option value="male">Masculino</option>
+                <option value="female">Feminino</option>
+                <option value="both">Ambos</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="busca">Quantidade:</label>
+            <input type="number" name="busca" id="busca" value="1" min="1" max="10" class="input-field">
+        </div>
+        <button type="button" onclick="obterDados()" class="action-btn">Obter Dados</button>
+        <button type="button" id="salvarBtn" onclick="salvarDados()" class="action-btn">Salvar Dados</button>
+    </form>
+    <div id="resultados" class="results hidden"></div>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+</body>
+</html>
