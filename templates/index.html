@@ -7,7 +7,16 @@
     <title>CP5 - Consumo de API com Python</title>
 </head>
 <body class="main-container">
-    <h1 class="title">Obter Dados</h1>
+     <header class="cabecalho">
+        <ul class="menu">
+            <li><a class="menu-links" href="#" onclick="showSection('cadastrar')">Cadastrar</a></li>
+            <li><a class="menu-links" href="#" onclick="showSection('consultar')">Consultar</a></li>
+            <li><a class="menu-links" href="#" onclick="showSection('alterar')">Alterar</a></li>
+            <li><a class="menu-links" href="#" onclick="showSection('deletar')">Deletar</a></li>
+        </ul>
+    </header>
+    <div id="cadastrar" class="content-section">
+        <h1 class="title">Cadastrar Dados</h1>
     <form id="dadosForm" class="data-form">
         <div class="form-group">
             <label for="generoSelect">Gênero:</label>
@@ -25,6 +34,33 @@
         <button type="button" id="salvarBtn" onclick="salvarDados()" class="action-btn">Salvar Dados</button>
     </form>
     <div id="resultados" class="results hidden"></div>
+
+    </div>
+
+
+
+    <div id="alterar" class="content-section hidden">
+        <!-- Seção para alteração -->
+    </div>
+
+    <div id="deletar" class="content-section hidden">
+    <h1>Deletar Usuário</h1>
+    <form onsubmit="deletarUsuario(); return false;">
+        <input type="text" id="deleteUserId" placeholder="Digite o ID do usuário para deletar" required>
+        <button type="submit">Deletar</button>
+    </form>
+</div>
+
+
+
+
+
+
+
+
+
+
+    
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 </html>

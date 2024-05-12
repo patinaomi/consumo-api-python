@@ -56,12 +56,16 @@ def consulta_db(comando, secret):
                               dsn=secret['dsn']) as connection:
             with connection.cursor() as cursor:
                 cursor.execute(comando)
-                return cursor.fetchall()
-
+                data = cursor.fetchall()
+                columns = [col[0] for col in cursor.description]  # Obtém os nomes das colunas
+                return data, columns
     except oracledb.DatabaseError as e:
         print(f'Erro no banco de dados: {e}')
+        return None, None
     except Exception as e:
         print(f'Erro: {e}')
+        return None, None
+
 
 
 sql_drop_tabela = 'DROP TABLE T_USER CASCADE CONSTRAINTS'
@@ -86,8 +90,8 @@ def obter_dados_api(qtd_busca, genero):
     if response.status_code == 200:
         dados = response.json()['results']
         return [{
-            'nome_completo': f"{dado['name']['first']} {dado['name']['last']}",
-            'genero': 'Feminino' if dado['gender'] == 'female' else 'Masculino',
+            'nome': f"{dado['name']['first']} {dado['name']['last']}",
+            'genero': 'F' if dado['gender'] == 'female' else 'M',
             'data': dado['dob']['date'][:10],
             'endereco': f"{dado['location']['street']['name']} {dado['location']['street']['number']}",
             'email': dado['email'],
@@ -138,13 +142,23 @@ def salvar_dados():
 
     resultados = []
     for dado in dados:
-        if inserir_dados_usuario(dado, secret):
-            resultados.append({'nome': dado['nome_completo'], 'status': 'sucesso'})
-        else:
-            resultados.append({'nome': dado['nome_completo'], 'status': 'falha'})
+        sucesso = inserir_dados_usuario(dado, secret)
+        resultados.append({'nome': dado['nome'], 'status': 'sucesso' if sucesso else 'falha'})
 
     return jsonify(resultados), 200
 
- 
+
+@app.route('/api/deletar/<int:user_id>', methods=['DELETE'])
+def deletar_usuario(user_id):
+    if user_id:
+        comando = f"DELETE FROM t_user WHERE id_user = {user_id}"
+        try:
+            operacao_db(comando, secret)
+            return jsonify({'mensagem': 'Usuário deletado com sucesso!'}), 200
+        except Exception as e:
+            return jsonify({'erro': str(e)}), 500
+    return jsonify({'erro': 'ID não fornecido.'}), 400
+
+
 if __name__ == '__main__':
     app.run(debug=True)
