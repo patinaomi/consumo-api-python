@@ -104,3 +104,9 @@ endereco = dict_pessoa['results'][0]['location']['street']['name'] + ' ' + str(d
 email = dict_pessoa['results'][0]['email']
 tel_residencial = validar_telefone(dict_pessoa['results'][0]['phone'], False)
 tel_celular = validar_telefone(dict_pessoa['results'][0]['cell'])
+
+sql_insert = f"""INSERT INTO t_user (nome, genero, data, endereco, email, tel_residencial, tel_celular) VALUES ('{
+nome_completo}', '{genero}',  TO_DATE('{data}','YYYY-MM-DD'), '{endereco}', '{email}', {tel_residencial},
+{tel_celular})"""
+
+operacao_db(sql_insert, secret)
