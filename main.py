@@ -134,6 +134,23 @@ def obter_dados():
         return jsonify({'erro': 'Falha ao obter dados da API'}), 400
 
 
+
+@app.route('/api/consultar/<int:user_id>', methods=['GET'])
+def consultar_usuario(user_id):
+    try:
+        comando = f"SELECT * FROM t_user WHERE id_user = {user_id}"
+        dados_usuario, columns = consulta_db(comando, secret)
+        if dados_usuario:
+            usuario = dict(zip(columns, dados_usuario[0]))
+            usuario['DATA'] = usuario['DATA'].strftime('%Y-%m-%d') if usuario.get('DATA') else 'N/A'
+            return jsonify(usuario), 200
+        else:
+            return jsonify({'erro': 'Usuário não encontrado.'}), 404
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
+
 @app.route('/api/salvar', methods=['POST'])
 def salvar_dados():
     dados = request.get_json()  # Obter os dados JSON enviados pelo cliente
@@ -148,17 +165,65 @@ def salvar_dados():
     return jsonify(resultados), 200
 
 
+
 @app.route('/api/deletar/<int:user_id>', methods=['DELETE'])
 def deletar_usuario(user_id):
     if user_id:
-        comando = f"DELETE FROM t_user WHERE id_user = {user_id}"
+        # Primeiro verifica se o usuário existe
+        comando_verificacao = f"SELECT * FROM t_user WHERE id_user = {user_id}"
+        dados_usuario, _ = consulta_db(comando_verificacao, secret)
+        if not dados_usuario:
+            return jsonify({'erro': 'Usuário não encontrado.'}), 404
+        
+        # Se existir, procede com a deleção
+        comando_deletar = f"DELETE FROM t_user WHERE id_user = {user_id}"
         try:
-            operacao_db(comando, secret)
+            operacao_db(comando_deletar, secret, commit=True)
             return jsonify({'mensagem': 'Usuário deletado com sucesso!'}), 200
         except Exception as e:
             return jsonify({'erro': str(e)}), 500
+
     return jsonify({'erro': 'ID não fornecido.'}), 400
 
 
+
+@app.route('/api/listar_usuarios', methods=['GET'])
+def listar_usuarios():
+    try:
+        comando = "SELECT * FROM t_user"
+        dados_usuario, columns = consulta_db(comando, secret)
+        if dados_usuario:
+            usuarios = [dict(zip(columns, usuario)) for usuario in dados_usuario]
+            for usuario in usuarios:
+                usuario['data'] = usuario['data'].strftime('%Y-%m-%d') if usuario.get('data') else 'N/A'  # Formatar data
+            return jsonify(usuarios), 200
+        else:
+            return jsonify({'erro': 'Nenhum usuário encontrado.'}), 404
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
+@app.route('/api/alterar/<int:user_id>', methods=['PUT'])
+def alterar_usuario(user_id):
+    dados = request.get_json()
+    try:
+        comando = f"""
+        UPDATE t_user SET
+        nome = '{dados['nome']}',
+        genero = '{dados['genero']}',
+        data = TO_DATE('{dados['data']}', 'YYYY-MM-DD'),
+        email = '{dados['email']}',
+        tel_residencial = {dados['tel_residencial']},
+        tel_celular = {dados['tel_celular']},
+        endereco = '{dados['endereco']}'
+        WHERE id_user = {user_id}
+        """
+        operacao_db(comando, secret, commit=True)
+        return jsonify({'mensagem': 'Dados atualizados com sucesso!'}), 200
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+
+ 
 if __name__ == '__main__':
     app.run(debug=True)

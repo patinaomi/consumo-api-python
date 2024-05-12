@@ -89,3 +89,15 @@ background-color: #bdb76b;
     font-size: 2em;
 
 }
+
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.user-info {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+}

@@ -11,6 +11,7 @@
         <ul class="menu">
             <li><a class="menu-links" href="#" onclick="showSection('cadastrar')">Cadastrar</a></li>
             <li><a class="menu-links" href="#" onclick="showSection('consultar')">Consultar</a></li>
+            <li><a class="menu-links" href="#" onclick="showSection('listarUsuarios')">Listar</a></li>
             <li><a class="menu-links" href="#" onclick="showSection('alterar')">Alterar</a></li>
             <li><a class="menu-links" href="#" onclick="showSection('deletar')">Deletar</a></li>
         </ul>
@@ -38,18 +39,54 @@
     </div>
 
 
+<div id="listarUsuarios" class="content-section hidden">
+    <h1>Listar Usuários</h1>
+    <button onclick="listarUsuarios()">Atualizar Lista</button>
+    <div id="usuarios"></div>
+</div>
 
-    <div id="alterar" class="content-section hidden">
-        <!-- Seção para alteração -->
-    </div>
+<div id="consultar" class="content-section hidden">
+    <h1>Consultar Usuário por ID</h1>
+    <form onsubmit="consultarUsuarioEspecifico(); return false;">
+        <input type="text" id="userIdConsulta" placeholder="Digite o ID do usuário" required>
+        <button type="submit">Consultar</button>
+    </form>
+    <div id="usuarioEspecifico" class="user-info hidden"></div>
+</div>
 
-    <div id="deletar" class="content-section hidden">
+
+
+
+
+
+<div id="alterar" class="content-section hidden">
+    <h1>Alterar Dados do Usuário</h1>
+    <form id="updateForm" onsubmit="alterarUsuario(); return false;">
+        <input type="number" id="updateUserId" placeholder="ID do Usuário" required>
+        <input type="text" id="updateNome" placeholder="Nome Completo" required>
+        <input type="text" id="updateGenero" placeholder="Gênero" required>
+        <input type="date" id="updateData" placeholder="Data de Nascimento" required>
+        <input type="text" id="updateEmail" placeholder="Email" required>
+        <input type="text" id="updateTelRes" placeholder="Telefone Residencial">
+        <input type="text" id="updateTelCel" placeholder="Telefone Celular">
+        <input type="text" id="updateEndereco" placeholder="Endereço" required>
+        <button type="submit">Atualizar Dados</button>
+    </form>
+    <div id="updateResult" class="user-info hidden"></div>
+</div>
+
+
+<div id="deletar" class="content-section hidden">
     <h1>Deletar Usuário</h1>
     <form onsubmit="deletarUsuario(); return false;">
         <input type="text" id="deleteUserId" placeholder="Digite o ID do usuário para deletar" required>
         <button type="submit">Deletar</button>
     </form>
+    <div id="deleteResult" class="user-info hidden"></div>
 </div>
+
+
+
 
 
 

@@ -72,6 +72,72 @@ function showSection(sectionId) {
   document.getElementById(sectionId).classList.remove("hidden");
 }
 
+function consultarUsuario() {
+  const userId = document.getElementById("userId").value;
+  fetch(`/api/consultar/${userId}`)
+    .then((response) => response.json())
+    .then((data) => {
+      const userDiv = document.getElementById("dadosUsuario");
+      if (data.erro) {
+        alert(data.erro);
+        userDiv.innerHTML = ""; // Limpar conteúdo anterior
+        userDiv.classList.add("hidden");
+      } else {
+        userDiv.innerHTML = `
+          <h2>Id: ${data.id}</h2>
+          <p>Nome: ${data.nome}</p>
+          <p>Data de Nascimento: ${data.data}</p>
+          <p>Gênero: ${data.genero}</p>
+          <p>Email: ${data.email}</p>
+          <p>Telefone Residencial: ${data.tel_residencial}</p>
+          <p>Telefone Celular: ${data.tel_celular}</p>
+          <p>Endereço: ${data.endereco}</p>
+        `;
+        userDiv.classList.remove("hidden");
+      }
+    })
+    .catch((error) => {
+      console.error("Erro ao buscar usuário:", error);
+      alert("Falha ao buscar usuário.");
+    });
+}
+
+
+function listarUsuarios() {
+  fetch("/api/listar_usuarios")
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data); // Isso ajudará a ver o que está sendo recebido.
+      const usuariosDiv = document.getElementById("usuarios");
+      usuariosDiv.innerHTML = ""; // Limpar lista atual
+
+      if (Array.isArray(data)) {
+        data.forEach((usuario) => {
+          const usuarioDiv = document.createElement("div");
+          usuarioDiv.innerHTML = `
+                    <p>ID: ${usuario.ID_USER}</p>
+                    <p><strong>Nome:</strong> ${usuario.NOME}</p>
+                    <p><strong>Data de Nascimento:</strong> ${usuario.DATA}</p>
+                    <p><strong>Gênero:</strong> ${usuario.GENERO}</p>
+                    <p><strong>Email:</strong> ${usuario.EMAIL}</p>
+                    <p><strong>Telefone Residencial:</strong> ${usuario.TEL_RESIDENCIAL}</p>
+                    <p><strong>Telefone Celular:</strong> ${usuario.TEL_CELULAR}</p>
+                    <p><strong>Endereço:</strong> ${usuario.ENDERECO}</p>
+                    <hr>
+                `;
+          usuariosDiv.appendChild(usuarioDiv);
+        });
+      } else {
+        usuariosDiv.innerHTML =
+          "<p>Nenhum usuário encontrado ou erro na requisição.</p>";
+      }
+    })
+    .catch((error) => {
+      console.error("Erro ao buscar usuários:", error);
+      alert("Falha ao buscar usuários.");
+    });
+}
+
 function deletarUsuario() {
   const userId = document.getElementById("deleteUserId").value;
   fetch(`/api/deletar/${userId}`, {
@@ -79,7 +145,12 @@ function deletarUsuario() {
   })
     .then((response) => response.json())
     .then((data) => {
-      alert(data.mensagem || data.erro);
+      if (data.mensagem) {
+        alert(data.mensagem);
+        document.getElementById("deleteResult").classList.add("hidden"); // Esconde os resultados após deletar
+      } else {
+        alert(data.erro);
+      }
     })
     .catch((error) => {
       console.error("Erro ao deletar o usuário:", error);
@@ -87,4 +158,32 @@ function deletarUsuario() {
     });
 }
 
+function alterarUsuario() {
+  const userId = document.getElementById("updateUserId").value;
+  const data = {
+    nome: document.getElementById("updateNome").value,
+    genero: document.getElementById("updateGenero").value,
+    data: document.getElementById("updateData").value,
+    email: document.getElementById("updateEmail").value,
+    tel_residencial: document.getElementById("updateTelRes").value,
+    tel_celular: document.getElementById("updateTelCel").value,
+    endereco: document.getElementById("updateEndereco").value,
+  };
 
+  fetch(`/api/alterar/${userId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      alert("Dados atualizados com sucesso!");
+      console.log(data);
+    })
+    .catch((error) => {
+      console.error("Erro ao atualizar dados:", error);
+      alert("Falha ao atualizar dados.");
+    });
+}
