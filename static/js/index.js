@@ -1,12 +1,14 @@
+// Define a função para obter dados baseados em gênero e termo de busca e exibi-los na página.
 function obterDados() {
   const genero = document.getElementById("generoSelect").value;
   const busca = document.getElementById("busca").value;
 
+  // Realiza uma requisição para a API com os parâmetros de busca e gênero.
   fetch(`/api/externo?genero=${genero}&busca=${busca}`)
     .then((response) => response.json())
     .then((dados) => {
       const resultadosDiv = document.getElementById("resultados");
-      resultadosDiv.innerHTML = "";
+      resultadosDiv.innerHTML = ""; // Limpa resultados anteriores.
       dados.forEach((dado, index) => {
         const pessoaDiv = document.createElement("div");
         pessoaDiv.className = "user-entry";
@@ -27,7 +29,7 @@ function obterDados() {
         `;
         resultadosDiv.appendChild(pessoaDiv);
       });
-      document.getElementById("resultados").classList.remove("hidden");
+      document.getElementById("resultados").classList.remove("hidden"); // Exibe os resultados.
       document.getElementById("salvarBtn").disabled = false;
     })
     .catch((error) => {
@@ -36,6 +38,7 @@ function obterDados() {
     });
 }
 
+// Define a função para salvar os dados selecionados pelo usuário.
 function salvarDados() {
   const checkboxes = document.querySelectorAll(".user-select:checked");
   if (checkboxes.length === 0) {
@@ -62,16 +65,15 @@ function salvarDados() {
     });
 }
 
+// Função para mostrar uma seção específica, escondendo outras.
 function showSection(sectionId) {
-  // Esconde todas as seções
-  document.querySelectorAll(".content-section").forEach((section) => {
-    section.classList.add("hidden");
-  });
-
-  // Mostra a seção específica
+  document
+    .querySelectorAll(".content-section")
+    .forEach((section) => section.classList.add("hidden"));
   document.getElementById(sectionId).classList.remove("hidden");
 }
 
+// Função para consultar dados de um usuário específico e exibir na página.
 function consultarUsuario() {
   const userId = document.getElementById("userId").value;
   fetch(`/api/consultar/${userId}`)
@@ -102,12 +104,11 @@ function consultarUsuario() {
     });
 }
 
-
+// A função 'listarUsuarios' é usada para obter e exibir uma lista de todos os usuários.
 function listarUsuarios() {
   fetch("/api/listar_usuarios")
     .then((response) => response.json())
     .then((data) => {
-      console.log(data); // Isso ajudará a ver o que está sendo recebido.
       const usuariosDiv = document.getElementById("usuarios");
       usuariosDiv.innerHTML = ""; // Limpar lista atual
 
@@ -138,6 +139,7 @@ function listarUsuarios() {
     });
 }
 
+// Define a função para deletar um usuário específico.
 function deletarUsuario() {
   const userId = document.getElementById("deleteUserId").value;
   fetch(`/api/deletar/${userId}`, {
@@ -158,6 +160,7 @@ function deletarUsuario() {
     });
 }
 
+// Função para verificar a existência de um usuário antes de tentar atualizá-lo.
 function alterarUsuario() {
   const userId = document.getElementById("updateUserId").value;
 
@@ -177,11 +180,16 @@ function alterarUsuario() {
     });
 }
 
+// Função para atualizar os dados de um usuário, após sua verificação.
 function atualizarDadosUsuario(userId) {
   const telefoneCel = document.getElementById("updateTelCel").value;
   const telefoneRes = document.getElementById("updateTelRes").value;
 
-  if (!validarTelefone(telefoneCel) || !validarTelefone(telefoneRes)) {
+  // Limpeza dos telefones antes de validar e enviar
+  const telefoneCelLimpo = telefoneCel.replace(/[^\d]/g, "");
+  const telefoneResLimpo = telefoneRes.replace(/[^\d]/g, "");
+
+  if (!validarTelefone(telefoneCelLimpo) || !validarTelefone(telefoneResLimpo)) {
     alert("Por favor, insira um número de telefone válido.");
     return false; // Interrompe a função se o telefone não for válido
   }
@@ -191,22 +199,21 @@ function atualizarDadosUsuario(userId) {
     genero: document.getElementById("updateGenero").value,
     data: document.getElementById("updateData").value,
     email: document.getElementById("updateEmail").value,
-    tel_residencial: telefoneRes,
-    tel_celular: telefoneCel,
+    tel_residencial: telefoneResLimpo,
+    tel_celular: telefoneCelLimpo,
     endereco: document.getElementById("updateEndereco").value,
   };
 
   fetch(`/api/alterar/${userId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   })
     .then((response) => response.json())
     .then((data) => {
       alert("Dados atualizados com sucesso!");
       console.log(data);
+      listarUsuarios(); // Chama a função listarUsuarios para atualizar a lista na página
     })
     .catch((error) => {
       console.error("Erro ao atualizar dados:", error);
@@ -215,6 +222,7 @@ function atualizarDadosUsuario(userId) {
 }
 
 
+// Função para consultar um usuário específico pelo ID e exibir seus detalhes.
 function consultarUsuarioEspecifico() {
   const userId = document.getElementById("userIdConsulta").value;
   fetch(`/api/consultar/${userId}`)
@@ -243,12 +251,13 @@ function consultarUsuarioEspecifico() {
     });
 }
 
+// Adiciona um evento para carregar a data máxima possível ao abrir a página.
 document.addEventListener("DOMContentLoaded", function () {
   const today = new Date().toISOString().split("T")[0];
   document.getElementById("updateData").max = today;
 });
 
-
+// Função para validar um número de telefone.
 function validarTelefone(telefone) {
   // Limpa o telefone removendo parênteses, espaços, hífens e outros caracteres não numéricos.
   const telefoneLimpo = telefone.replace(/[^\d]/g, "");
@@ -257,4 +266,3 @@ function validarTelefone(telefone) {
   const regexTelefone = /^\d{10,11}$/;
   return regexTelefone.test(telefoneLimpo);
 }
-

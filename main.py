@@ -8,13 +8,13 @@ from flask import Flask, request, jsonify, render_template
 def validar_telefone(telefone, cel=True):
     # Remove caracteres não numéricos da string telefone usando a função filter e str.isdigit
     # e depois o join junta os caracteres restantes de volta em uma string única.
-
     telefone_limpo = ''.join(filter(str.isdigit, telefone))
 
     if cel:
         return telefone_limpo[:2] + '9' + telefone_limpo[2:]
     else:
         return telefone_limpo
+
 
 def validar_email(email):
     regex_email = r'^[\w\.-]+@[\w\.-]+\.\w+'
@@ -48,7 +48,7 @@ def carregar_dados(dados):
 
 secret = carregar_dados('secret.json')
 
-
+# Operações de banco de dados
 def operacao_db(comando, secret, commit=True):
     try:
         with oracledb.connect(user=secret['user'],
@@ -56,14 +56,15 @@ def operacao_db(comando, secret, commit=True):
                               dsn=secret['dsn']) as connection:
             with connection.cursor() as cursor:
                 cursor.execute(comando)
-
                 if commit:
                     connection.commit()
-
+                return cursor.rowcount  # Retorna o número de linhas afetadas
     except oracledb.DatabaseError as e:
         print(f'Erro no banco de dados: {e}')
+        return None  # Retorna None em caso de erro
     except Exception as e:
         print(f'Erro: {e}')
+        return None
 
 
 def consulta_db(comando, secret):
@@ -98,7 +99,7 @@ sql_criar_tabela = """
     tel_celular NUMBER(20)
 )"""
 
-
+# API para obtenção de dados externos
 def obter_dados_api(qtd_busca, genero):
     gender_param = '' if genero == 'both' else f'&gender={genero}'
     url = f'https://randomuser.me/api/?results={qtd_busca}&nat=br{gender_param}&inc=name,gender,nat,location,dob,email,phone,cell,picture&noinfo'
@@ -222,6 +223,12 @@ def listar_usuarios():
 @app.route('/api/alterar/<int:user_id>', methods=['PUT'])
 def alterar_usuario(user_id):
     dados = request.get_json()
+    if not dados or not all(key in dados for key in ['nome', 'genero', 'data', 'email', 'tel_residencial', 'tel_celular', 'endereco']):
+        return jsonify({'erro': 'Dados incompletos fornecidos'}), 400
+    print(f"Recebendo dados para atualizar: {dados}")  # Log dos dados recebidos
+    if not dados:
+        return jsonify({'erro': 'Nenhum dado fornecido para atualização'}), 400
+
     comando_verificacao = f"SELECT * FROM t_user WHERE id_user = {user_id}"
     dados_usuario, _ = consulta_db(comando_verificacao, secret)
     if not dados_usuario:
@@ -239,14 +246,16 @@ def alterar_usuario(user_id):
         endereco = '{dados['endereco']}'
         WHERE id_user = {user_id}
         """
-        operacao_db(comando, secret, commit=True)
-        return jsonify({'mensagem': 'Dados atualizados com sucesso!'}), 200
+        rows_affected = operacao_db(comando, secret, commit=True)
+        if rows_affected > 0:
+            print(f"Linhas atualizadas: {rows_affected}")  # Log do sucesso
+            return jsonify({'mensagem': 'Dados atualizados com sucesso!'}), 200
+        else:
+            print("Nenhuma linha atualizada.")  # Log de falha
+            return jsonify({'erro': 'Nenhuma alteração realizada.'}), 200
     except Exception as e:
+        print(f'Erro ao atualizar dados: {e}')  # Log de exceção
         return jsonify({'erro': str(e)}), 500
-
-
-
-
  
 if __name__ == '__main__':
     app.run(debug=True)
