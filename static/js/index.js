@@ -160,13 +160,39 @@ function deletarUsuario() {
 
 function alterarUsuario() {
   const userId = document.getElementById("updateUserId").value;
+
+  // Primeiro verifica se o usuário existe
+  fetch(`/api/consultar/${userId}`)
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.erro) {
+        alert("Usuário não encontrado.");
+        throw new Error("Usuário não encontrado."); // Interrompe a execução
+      } else {
+        return atualizarDadosUsuario(userId); // Prossiga com a atualização se o usuário existir
+      }
+    })
+    .catch((error) => {
+      console.error("Erro ao verificar o usuário:", error);
+    });
+}
+
+function atualizarDadosUsuario(userId) {
+  const telefoneCel = document.getElementById("updateTelCel").value;
+  const telefoneRes = document.getElementById("updateTelRes").value;
+
+  if (!validarTelefone(telefoneCel) || !validarTelefone(telefoneRes)) {
+    alert("Por favor, insira um número de telefone válido.");
+    return false; // Interrompe a função se o telefone não for válido
+  }
+
   const data = {
     nome: document.getElementById("updateNome").value,
     genero: document.getElementById("updateGenero").value,
     data: document.getElementById("updateData").value,
     email: document.getElementById("updateEmail").value,
-    tel_residencial: document.getElementById("updateTelRes").value,
-    tel_celular: document.getElementById("updateTelCel").value,
+    tel_residencial: telefoneRes,
+    tel_celular: telefoneCel,
     endereco: document.getElementById("updateEndereco").value,
   };
 
@@ -187,3 +213,48 @@ function alterarUsuario() {
       alert("Falha ao atualizar dados.");
     });
 }
+
+
+function consultarUsuarioEspecifico() {
+  const userId = document.getElementById("userIdConsulta").value;
+  fetch(`/api/consultar/${userId}`)
+    .then((response) => response.json())
+    .then((usuario) => {
+      const usuarioDiv = document.getElementById("usuarioEspecifico");
+      if (usuario.erro) {
+        alert(usuario.erro);
+        usuarioDiv.classList.add("hidden");
+      } else {
+        usuarioDiv.innerHTML = `
+                <p><strong>Nome:</strong> ${usuario.NOME}</p>
+                <p><strong>Data de Nascimento:</strong> ${usuario.DATA}</p>
+                <p><strong>Gênero:</strong> ${usuario.GENERO}</p>
+                <p><strong>Email:</strong> ${usuario.EMAIL}</p>
+                <p><strong>Telefone Residencial:</strong> ${usuario.TEL_RESIDENCIAL}</p>
+                <p><strong>Telefone Celular:</strong> ${usuario.TEL_CELULAR}</p>
+                <p><strong>Endereço:</strong> ${usuario.ENDERECO}</p>
+            `;
+        usuarioDiv.classList.remove("hidden");
+      }
+    })
+    .catch((error) => {
+      console.error("Erro ao buscar usuário:", error);
+      alert("Falha ao buscar usuário.");
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const today = new Date().toISOString().split("T")[0];
+  document.getElementById("updateData").max = today;
+});
+
+
+function validarTelefone(telefone) {
+  // Limpa o telefone removendo parênteses, espaços, hífens e outros caracteres não numéricos.
+  const telefoneLimpo = telefone.replace(/[^\d]/g, "");
+
+  // Verifica se tem 10 ou 11 dígitos
+  const regexTelefone = /^\d{10,11}$/;
+  return regexTelefone.test(telefoneLimpo);
+}
+

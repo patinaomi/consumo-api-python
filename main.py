@@ -1,6 +1,7 @@
 import json
 import oracledb
 import requests
+import re
 from flask import Flask, request, jsonify, render_template
 
 
@@ -14,6 +15,22 @@ def validar_telefone(telefone, cel=True):
         return telefone_limpo[:2] + '9' + telefone_limpo[2:]
     else:
         return telefone_limpo
+
+def validar_email(email):
+    regex_email = r'^[\w\.-]+@[\w\.-]+\.\w+'
+
+    if re.match(regex_email, email):
+        return True
+    else:
+        return False
+
+
+def validar_nome(nome):
+    regex_nome = r'^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$'
+    if re.match(regex_nome, nome):
+        return True
+    else:
+        return False
 
 
 def carregar_dados(dados):
@@ -202,10 +219,14 @@ def listar_usuarios():
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
 
-
 @app.route('/api/alterar/<int:user_id>', methods=['PUT'])
 def alterar_usuario(user_id):
     dados = request.get_json()
+    comando_verificacao = f"SELECT * FROM t_user WHERE id_user = {user_id}"
+    dados_usuario, _ = consulta_db(comando_verificacao, secret)
+    if not dados_usuario:
+        return jsonify({'erro': 'Usuário não encontrado.'}), 404
+
     try:
         comando = f"""
         UPDATE t_user SET
@@ -222,6 +243,8 @@ def alterar_usuario(user_id):
         return jsonify({'mensagem': 'Dados atualizados com sucesso!'}), 200
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
+
+
 
 
  

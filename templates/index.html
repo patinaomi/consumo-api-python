@@ -7,6 +7,8 @@
     <title>CP5 - Consumo de API com Python</title>
 </head>
 <body class="main-container">
+
+    <!-- Cabeçalho -->
      <header class="cabecalho">
         <ul class="menu">
             <li><a class="menu-links" href="#" onclick="showSection('cadastrar')">Cadastrar</a></li>
@@ -16,88 +18,138 @@
             <li><a class="menu-links" href="#" onclick="showSection('deletar')">Deletar</a></li>
         </ul>
     </header>
-    <div id="cadastrar" class="content-section">
-        <h1 class="title">Cadastrar Dados</h1>
-    <form id="dadosForm" class="data-form">
-        <div class="form-group">
-            <label for="generoSelect">Gênero:</label>
-            <select name="genero" id="generoSelect" class="input-field">
-                <option value="male">Masculino</option>
-                <option value="female">Feminino</option>
-                <option value="both">Ambos</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="busca">Quantidade:</label>
-            <input type="number" name="busca" id="busca" value="1" min="1" max="10" class="input-field">
-        </div>
-        <button type="button" onclick="obterDados()" class="action-btn">Obter Dados</button>
-        <button type="button" id="salvarBtn" onclick="salvarDados()" class="action-btn">Salvar Dados</button>
-    </form>
-    <div id="resultados" class="results hidden"></div>
 
+
+    <!-- Cadastro -->
+    <div id="cadastrar" class="content-section hidden">
+        <h1 class="title">Novo Usuário</h1>
+        <form id="dadosForm" class="data-form">
+            <div class="form-group">
+                <label for="generoSelect">Gênero:</label>
+                <select name="genero" id="generoSelect" class="input-field">
+                    <option value="">Selecione o Gênero</option>
+                    <option value="male">Masculino</option>
+                    <option value="female">Feminino</option>
+                    <option value="both">Ambos</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="busca">Quantidade:</label>
+                <input type="number" name="busca" id="busca" value="1" min="1" max="10" class="input-field">
+            </div>
+            <button type="button" onclick="obterDados()" class="action-btn">Obter Dados</button>
+            <button type="button" id="salvarBtn" onclick="salvarDados()" class="action-btn">Salvar Dados</button>
+        </form>
+        <div id="resultados" class="results hidden"></div>
+    </div>
+    
+    
+    <!-- Consultar -->
+    <div id="consultar" class="content-section hidden">
+        <h1>Consultar Usuário por ID</h1>
+        <form id="consultaForm" class="data-form" onsubmit="consultarUsuarioEspecifico(); return false;">
+            <div class="form-group">
+                <label for="userIdConsulta">ID do Usuário:</label>
+                <input type="number" step="1" min="1" id="userIdConsulta" class="input-field" placeholder="Digite o ID" required>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="action-btn">Consultar</button>
+            </div>
+        </form>
+        <div id="usuarioEspecifico" class="user-info hidden"></div>
+    </div>
+    
+    
+    <!-- Listar -->
+    <div id="listarUsuarios" class="content-section hidden">
+        <h1>Listar Usuários</h1>
+        <div class="form-group">
+            <button onclick="listarUsuarios()" class="action-btn">Atualizar Lista</button>
+        </div>
+        <div id="usuarios" class="user-list"></div>
     </div>
 
 
-<div id="listarUsuarios" class="content-section hidden">
-    <h1>Listar Usuários</h1>
-    <button onclick="listarUsuarios()">Atualizar Lista</button>
-    <div id="usuarios"></div>
-</div>
+    <!-- Alterar -->
+    <div id="alterar" class="content-section hidden">
+        <h1>Alterar Dados</h1>
+        <form id="updateForm" onsubmit="alterarUsuario(); return false;">
+            <!-- ID do Usuário -->
+            <div class="form-group">
+                <label for="updateUserId">ID do Usuário:</label>
+                <input type="number" id="updateUserId" placeholder="Digite o ID do usuário" min="1" required>
+            </div>
+            
+            <!-- Nome Completo -->
+            <div class="form-group">
+                <label for="updateNome">Nome Completo:</label>
+                <input type="text" id="updateNome" placeholder="Nome completo do usuário" pattern="[A-Za-zÀ-ÖØ-öø-ÿ\s]+" title="Nome deve conter apenas letras e espaços." required>
+            </div>
+            
+            <!-- Gênero -->
+            <div class="form-group">
+                <label for="updateGenero">Gênero:</label>
+                <select id="updateGenero" required>
+                    <option value="">Selecione o gênero</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Feminino</option>
+                </select>
+            </div>
+            
+            <!-- Data de Nascimento -->
+            <div class="form-group">
+                <label for="updateData">Data de Nascimento:</label>
+                <input type="date" id="updateData" max="{{ max_date }}" required>
+            </div>
+            
+            <!-- Email -->
+            <div class="form-group">
+                <label for="updateEmail">Email:</label>
+                <input type="email" id="updateEmail" placeholder="Email do usuário" required>
+            </div>
+            
+            <!-- Telefone Residencial -->
+            <div class="form-group">
+                <label for="updateTelRes">Telefone Residencial:</label>
+                <input type="text" id="updateTelRes" placeholder="Telefone residencial" required>
+            </div>
+            
+            <!-- Telefone Celular -->
+            <div class="form-group">
+                <label for="updateTelCel">Telefone Celular:</label>
+                <input type="text" id="updateTelCel" placeholder="Telefone celular" required>
+            </div>
+            
+            <!-- Endereço -->
+            <div class="form-group">
+                <label for="updateEndereco">Endereço:</label>
+                <input type="text" id="updateEndereco" placeholder="Endereço completo" required>
+            </div>
+            
+            <!-- Botão de Submissão -->
+            <button type="submit" class="action-btn">Atualizar</button>
+        </form>
+        <div id="updateResult" class="user-info hidden"></div>
+    </div>
 
-<div id="consultar" class="content-section hidden">
-    <h1>Consultar Usuário por ID</h1>
-    <form onsubmit="consultarUsuarioEspecifico(); return false;">
-        <input type="text" id="userIdConsulta" placeholder="Digite o ID do usuário" required>
-        <button type="submit">Consultar</button>
-    </form>
-    <div id="usuarioEspecifico" class="user-info hidden"></div>
-</div>
 
+    <div id="deletar" class="content-section hidden">
+        <h1>Deletar Usuário</h1>
+        <form onsubmit="deletarUsuario(); return false;">
+            <!-- ID do Usuário -->
+            <div class="form-group">
+                <label for="deleteUserId">ID do Usuário:</label>
+                <input type="number" id="deleteUserId" placeholder="Digite o ID" min="1" step="1" required>
+            </div>
+            
+            <!-- Botão de Deletar -->
+            <div class="form-group">
+                <button type="submit" class="action-btn">Deletar</button>
+            </div>
+        </form>
+        <div id="deleteResult" class="user-info hidden"></div>
+    </div>
 
-
-
-
-
-<div id="alterar" class="content-section hidden">
-    <h1>Alterar Dados do Usuário</h1>
-    <form id="updateForm" onsubmit="alterarUsuario(); return false;">
-        <input type="number" id="updateUserId" placeholder="ID do Usuário" required>
-        <input type="text" id="updateNome" placeholder="Nome Completo" required>
-        <input type="text" id="updateGenero" placeholder="Gênero" required>
-        <input type="date" id="updateData" placeholder="Data de Nascimento" required>
-        <input type="text" id="updateEmail" placeholder="Email" required>
-        <input type="text" id="updateTelRes" placeholder="Telefone Residencial">
-        <input type="text" id="updateTelCel" placeholder="Telefone Celular">
-        <input type="text" id="updateEndereco" placeholder="Endereço" required>
-        <button type="submit">Atualizar Dados</button>
-    </form>
-    <div id="updateResult" class="user-info hidden"></div>
-</div>
-
-
-<div id="deletar" class="content-section hidden">
-    <h1>Deletar Usuário</h1>
-    <form onsubmit="deletarUsuario(); return false;">
-        <input type="text" id="deleteUserId" placeholder="Digite o ID do usuário para deletar" required>
-        <button type="submit">Deletar</button>
-    </form>
-    <div id="deleteResult" class="user-info hidden"></div>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 </html>
