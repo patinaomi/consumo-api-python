@@ -1,5 +1,6 @@
 
 # Consumo de API com Python
+<p align="center">  <img loading="lazy" src="http://img.shields.io/static/v1?label=STATUS&message=EM%20DESENVOLVIMENTO&color=GREEN&style=for-the-badge"/>  </p>
 
 ## Objetivo
 O objetivo deste projeto é criar uma aplicação em Python que consuma informações da Random User API, uma API pública que gera dados de usuários aleatórios, e armazene esses dados em uma base de dados Oracle. A interface do usuário foi desenvolvida utilizando HTML, CSS e JavaScript, e inclui validações tanto no frontend quanto no backend para garantir a integridade dos dados.
