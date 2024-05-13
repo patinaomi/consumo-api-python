@@ -13,19 +13,21 @@ function obterDados() {
         const pessoaDiv = document.createElement("div");
         pessoaDiv.className = "user-entry";
         pessoaDiv.innerHTML = `
+        <div class="user-entry__image">
           <input type="checkbox" class="user-select" data-user='${JSON.stringify(
             dado
           )}'>
-          <p>Nome: ${dado.nome}</p>
-          <p>Data de Nascimento: ${dado.data}</p>
-          <p>Gênero: ${dado.genero}</p>
-          <p>Email: ${dado.email}</p>
-          <p>Telefone: ${dado.tel_residencial}</p>
-          <p>Celular: ${dado.tel_celular}</p>
-          <p>Endereço: ${dado.endereco}</p>
-          <img src="${dado.imagem}" alt="Foto de ${
+          <img src="${dado.imagem}" class="img-user" alt="Foto de ${
           dado.nome
         }" class="user-image">
+          <p><strong>Nome:</strong><br> ${dado.nome}</p>
+          <p><strong>Data de Nascimento:</strong><br> ${dado.data}</p>
+          <p><strong>Gênero:</strong><br> ${dado.genero}</p>
+          <p><strong>Email:</strong><br> ${dado.email}</p>
+          <p><strong>Telefone:</strong><br> ${dado.tel_residencial}</p>
+          <p><strong>Celular:</strong><br> ${dado.tel_celular}</p>
+          <p><strong>Endereço:</strong><br> ${dado.endereco}</p>
+        </div>
         `;
         resultadosDiv.appendChild(pessoaDiv);
       });
@@ -86,14 +88,16 @@ function consultarUsuario() {
         userDiv.classList.add("hidden");
       } else {
         userDiv.innerHTML = `
-          <h2>Id: ${data.id}</h2>
-          <p>Nome: ${data.nome}</p>
-          <p>Data de Nascimento: ${data.data}</p>
-          <p>Gênero: ${data.genero}</p>
-          <p>Email: ${data.email}</p>
-          <p>Telefone Residencial: ${data.tel_residencial}</p>
-          <p>Telefone Celular: ${data.tel_celular}</p>
-          <p>Endereço: ${data.endereco}</p>
+          <div class="user-entry-consulta">
+          <h2><strong>Id:</strong> ${data.id}</h2>
+          <p><strong>Nome:</strong> ${data.nome}</p>
+          <p><strong>Data de Nascimento:</strong> ${data.data}</p>
+          <p><strong>Gênero:</strong> ${data.genero}</p>
+          <p><strong>Email:</strong> ${data.email}</p>
+          <p><strong>Telefone Residencial:</strong> ${data.tel_residencial}</p>
+          <p><strong>Telefone Celular:</strong> ${data.tel_celular}</p>
+          <p><strong>Endereço:</strong> ${data.endereco}</p>
+          </div>
         `;
         userDiv.classList.remove("hidden");
       }
@@ -116,15 +120,17 @@ function listarUsuarios() {
         data.forEach((usuario) => {
           const usuarioDiv = document.createElement("div");
           usuarioDiv.innerHTML = `
-                    <p>ID: ${usuario.ID_USER}</p>
+          <div class="user-entry-lista">  
+                    <p><strong>ID:</strong> ${usuario.ID_USER}</p>
                     <p><strong>Nome:</strong> ${usuario.NOME}</p>
                     <p><strong>Data de Nascimento:</strong> ${usuario.DATA}</p>
                     <p><strong>Gênero:</strong> ${usuario.GENERO}</p>
                     <p><strong>Email:</strong> ${usuario.EMAIL}</p>
                     <p><strong>Telefone Residencial:</strong> ${usuario.TEL_RESIDENCIAL}</p>
                     <p><strong>Telefone Celular:</strong> ${usuario.TEL_CELULAR}</p>
-                    <p><strong>Endereço:</strong> ${usuario.ENDERECO}</p>
+                    <p><strong>Endereço:</strong> ${usuario.ENDERECO}</p> <br>
                     <hr>
+                    </div>
                 `;
           usuariosDiv.appendChild(usuarioDiv);
         });
